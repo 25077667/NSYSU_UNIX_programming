@@ -1,0 +1,632 @@
+                            UNIX System Programming
+                           Programming Assignment #2
+
+Due: Friday, April 10  at  11:59 pm.
+
+Submission method: You will post to the course website, just like the previous
+                   assignment. 
+
+Submission rules: I REQUIRE you to FOLLOW THESE RULES:
+
+                  1. Submit one file named "<your student ID>.PA2.tar"
+		     This tar file will contain a single directory named:
+		         "<your student ID>.PA2"
+		     That directory will contain 2 files, named:
+		         "<your student ID>.PA2" and "drop.sh"
+		     
+                  2. Submissions made after the deadline will be ignored.
+                     (That means: no late submissions on this assignment.)
+                     (By the way, assignments are a significant part of your
+		      grade. So start early and ask questions.)
+                  
+                  This is a large class. Unless each of you follows the above
+                  rules, the TAs' work becomes so hard. So I INSIST that you 
+                  FOLLOW the above rules. If you don't, we won't accept your 
+                  homework.
+
+                  If you have questions about these rules, you may post your 
+                  questions to the course website.
+
+
+Getting help:   - The Professor has office hours on Monday from 12:30-2:30, 
+                  and on Friday from 10:00-12:00, in room 9037.  He can also 
+                  be reached by email.
+                - The TAs are also available to answer your questions.
+                - Questions about the assignment can be posted to the 
+                  Discussion Forum.
+                - You may also discuss the ideas of the assignment with your
+                  classmates. Such discussions can be quite helpful to your 
+                  learning -- IF you ONLY talk about the general concepts of
+		  the steps of the assignment.
+		  - If, however, you tell other students the specific details
+		    of your implementation, then you are not helping each other
+		    to learn; you are just doing the work for them.
+                    In other words, you are cheating. You CANNOT show another
+		    student ANY part of the answer to the assignment.
+
+Cheating policy:  We encourage students to form study groups. But this does not
+                  mean sharing code. If students are found to be sharing work,
+		  they can receive a 0 for the entire course, or worse.
+                  It is cheating to let another student see your work, or to 
+                  let them look over your shoulder when your code is on the
+		  screen.
+		  A good way to know you cheated: if you have code that is in
+		  your solution just because another student told you to put
+		  it there, but you don't actually understand it.
+		  If you are still unsure, you can ask the TA for more
+		  explanation.
+                  We always look for evidence of cheating, so don't do it.
+                  (In any event, even if you do not get caught, those who 
+                  copy the homework will not learn the material, so they 
+                  will fail the exam.)
+
+Most Important    The programming assignments are a large part of the grade.
+Things to Know:	  This large point value means that, if you don't do them, you
+		  may fail.
+		  The large point value also explains why the policy against
+		  cheating is strictly enforced.
+		  
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - - - - - - - - - - - - - - -  Project Overview - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ 
+For this programming assignment, you will create two files. One of them,
+PA2.<yourStudentID>.sh, is described in this README file. The other, "drop.sh",
+is described in a second posted file, "READMEdrop".
+
+You'll have noticed that this is one of three files that were in the tar file:
+  % cd PA2assignment
+  % ls
+  PA1.tar  README.revised.PA2  READMEdrop
+  %
+
+The PA1.tar file is my solution to programming assignment 1. Regardless of
+whether you completed your assignment #1, you can use my supplied PA1.tar file
+for this current assignment.
+
+The READMEdrop file contains instructions on implementing the drop.sh file.
+
+This present file, README.revise.PA2, has a new top portion (the portion you
+are reading right now) added to the originally posted README.PA2 file. It also
+has fixed a few minor typos from the originally posted README.PA2 file, most
+notably a line indicating that Line 13 is blank. To see what all those fixed
+typos are, you can run "diff" on the two versions.
+
+The goal of this new assignment is to use the directories from assignment 1 to
+play the game dunnet. Although we will not implement all of the commands, we
+will implement enough to demonstrate the power of UNIX.
+
+To truly show the power of the UNIX philosophy of combining simple tools to
+do something complex, you will only be allowed to use commands and techniques
+from lectures 1 and 2 (not even lecture 3 is allowed, except that tr is used).
+
+Now, in the first two lectures, we did not learn variables or loop structures.
+So how can we make a game? The answer is that we will convert the UNIX command
+prompt into the game. The key idea is to use aliases to create UNIX commands
+for the game commands. The details of how to do this are given below.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ - - - - - - Line-by-line Description of PA2's Aliases Script File - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+In the following discussion, sometimes the path will be displayed, like so:
+  % cd
+  % pwd
+  /home/Me
+  %
+
+In such cases, your path will be different, because you of course have a
+different user name than "Me".
+
+The rest of this file is a line-by-line description of the homework. As shown
+below, some parts are given to you already (such as Lines 1-10):
+
+Lines 1-5: rm -f ~/X ~/O ~/I ~/A
+           ln -s /dev/null ~/X
+           ln -s ~/PA2/inventory ~/I
+           ln -s ~/PA2/objects ~/O
+           ln -s ~/PA2/obj ~/A
+
+           The above five lines create very short names linking to relevant
+           directories of the game.
+ -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Lines 6-8: alias nogo='echo You cannot go that way.'
+           alias nokey='echo You do not have a key that can open this door.'
+           alias quit='echo You scored 0 out of a possible 90 points.;exit'
+
+           These lines create short commands to print three of the messages 
+           that the game displays in certain situations. In the case of the 
+           "quit" command, it then also runs "exit" which is a UNIX command 
+           that, in this case, leaves the current shell. (When you get to the
+           bottom of this file you will find a brief description of how you
+           run the game. There you will find that you are meant to type "bash"
+           before sourcing the programming assignment script. So this "exit"
+           command leaves the bash environment that we had created right
+           before we ran "source".)
+ -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 9: alias l='mv 1 9;see'
+
+        This line implements the game's "l" (look) command. The line does two
+        things: 
+        1.It renames the file from '1' to '9'. Why? Well, as we'll see below,
+          the '1' or '9' will affect how the room description displays. If the 
+          file is named '9', then that indicates that the long version of the
+          room description should be used. (That is why, in homework 1, we put
+          the file '9' in each directory -- the game begins with none of the
+          places having been visited, so they all need long descriptions.)  
+        2.It runs another command, "see". This command will be written by you
+          on Line 11, below. Why is it legal for us to use "see" here on Line 9
+          before it has been defined? It is legal because we are only defining
+          the "l" command, not running it. (It would be an error to execute "l"
+          before we implemented "see".)
+          Let us consider what "see" does. It displays the room contents in
+          either short or long form, depending on whether the place has been
+          visited before (which, we have just learned, depends on whether the
+          file "1" or the file "9" is present).
+          So, by moving "1" to "9", we ensure that "see" will display in long
+          form. That is, after all, the desired effect of the "l" command.
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 10: alias drop='~/drop.sh'
+         This invokes a script named "drop.sh". It is a script that you will
+         need to write, as will be described in a second README file, to be
+         posted later.
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 11: alias see='head -n _1_; mv _2_; itemAlerts; echo -n'
+
+         As we see, this command has four parts. Of these parts, the last two
+         are given to you:
+          itemAlerts - This is a command that you will be defining on line 12.
+          echo -n - This command prints nothing. If it does nothing, why put
+                    it here? Because we want our "see" command to end with a
+                    success value (Lines 14-22 will need "see" to do this).  
+
+         Now, as for the other 2 parts of the "see" commands, you will have to
+         implement them, according to the directions shown here:
+          _1_: This command displays the room description (ie, the .d file).
+               This description might be in long or short form. The "head"
+               command controls how much of the description to display. Now we
+               know that there is a file in this directory that is named either
+               "1" or "9". It is named "1" in those situations where the place
+               has been visited. In other words, it is named "1" when just 1
+               line from the .d file should display. Otherwise, the file is
+               named "9". Since none of the .d files are longer than 9 lines,
+               telling "head" to display the first 9 lines actually means that
+               the entire .d file will display.
+               Note: Normally things like "head -9" and "head -n9" behave the
+                     same, so the "n" isn't needed. In this present case,
+                     however, you won't be directly using a number. You will
+                     be using the `` operator to create the number. As a 
+                     consequence, I've indicated that you need the "-n" flag.
+                     
+          _2_: This marks the current place as having been visited, by getting
+               rid of the "1" file and creating the "9" file. It is possible,
+               however, that the room has already been visited and the "9"
+               file already exists. In that case, you will need to suppress
+               the error message from this "mv" command.
+               
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 12: alias itemAlerts='(ls _1_ | __x__ | _2_ ~/O/.alerts) 2> ~/X'
+
+         To understand this line, let's begin by describing what it does. It
+         displays all of appropriate object messages. These messages are all
+         stored in the ~/O/.alerts file, so let's see what that file contains:
+          % cat ~/O/.alerts
+          The panel lights are steady and motionless.
+          The panel lights are flashing in a seemingly organized pattern.
+          There is a CPU card here.
+          There is a ferocious bear here!
+          There is a lamp nearby.
+          There is a large boulder here.
+          There is a shiny brass key here.
+          There is a shovel here.
+          There is an emerald bracelet here.
+          There is some food here.
+
+        Yes, the above messages are those objects for which the game alerts the
+        player to their presence in that location, (and there are also the two
+        messages about the panel lights' behavior).
+        The most important feature of the above output is that each object's
+        name appears within its message (in the case of the cpu/card/board,
+        only one of that object's three names is in its message, but that
+        still means that even it does have at least that one match).
+        The second important feature is that none of the objects that don't
+        display (eg, tree, coconut, bins, etc) appear in any of the messages.
+
+        To understand what we need, consider the following:
+          % source ./pa2.sh
+          Dead end
+          You are at a dead end of a dirt road.  The road goes to the east.
+          In the distance you can see that it will eventually fork off.  The
+          trees here are very tall royal palms, and they are spaced equidistant
+          from each other.
+          There is a shovel here.
+          >ls _1_
+          coconut  coconuts  palm  shovel  tree  trees
+          >
+
+        The "ls _1_" printed are all of the objects in the location. It did
+        not print the "e" or the "1". Therefore your answer to "_1_" must be a
+        wildcard pattern that list just the files shown and not the others. The
+        solution is easy: match to ALL FILENAMES WITH ATLEAST 3 LETTERRS.
+
+        Now once we have ls _1_ working, its answer is passed into __x__, which
+        is actually a sequence of commands, rather than a single one. Let's
+        see what it does:
+          >ls _1_
+          coconut  coconuts  palm  shovel  tree  trees
+          >ls _1_ | __x__
+               -e     coconut
+               -e     coconuts
+               -e     palm
+               -e     shovel
+               -e     tree
+               -e     trees
+          >
+          
+        What it the point o creating the above output? Well, it can be passed
+        on as arguments to fgrep. That is what happens in _2_:
+        
+          >ls _1_ | __x__ | _2_ ~/O/.alerts
+          There is a shovel here.
+          >itemAlerts
+          There is a shovel here.
+          >fgrep -e coconut -e coconuts -e palm -eshovel -etree -etrees ~/O/.a*
+          There is a shovel here.
+          >(I put no spaces after some -e's, only so as to keep it on 1 line)
+
+        From the above, we see that the _2_ command is turning __x__'s output
+        into arguments to fgrep. When I provided those arguments directly to
+        fgrep, it had the same effect. And, when I ran "itemsAlert" directly,
+        I of course got the same output.
+
+        By this point, we have described enough about _1_ and _2_, but not
+        enough about the more complicated __x__. Recall what it does:
+          >ls _1_
+          coconut  coconuts  palm  shovel  tree  trees
+          >echo -n||Although this output is on 1 line, that isn't how ls pipes:
+          >ls _1_ | head -2
+          coconut
+          coconuts
+          >
+          >echo -n|| Now let's recall the effect of the __x__ command sequence:
+          >ls _1_ | __x__
+               -e     coconut
+               -e     coconuts
+               -e     palm
+               -e     shovel
+               -e     tree
+               -e     trees
+          >
+
+        As we see, the __x__ command sequence puts the -e's at the front of the
+        lines. But how can we do that?
+        Adding new characters is different than removing them. As we know, we
+        can remove character positions with "cut -c" and character values with
+        "tr -d". But we have not (as yet) learned a command that is designed to
+        add characters. Since we are limiting ourselves to the ideas from the
+        first 2 lectures (and the "tr" command from lecture 3), it will be a
+        bit tricky to get what we need.
+
+        The insight is that we do know of a command that can put new characters
+        at the front of each line: "cat -n". The __x__ command sequence is
+        therefore a series of multiple "cat" and "tr" commands. These commands
+        convert some of the line number information into the "-" and the "e",
+        while removing some other parts of the line number information. To get
+        it to work, you will need trial-and-error. But note: you can only use
+        "cat -n" and "tr" (but you may use as many of them as you want).
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 13: Leave this line blank (There was a numbering problem in the earlier )
+Line 14: Leave this line blank (version of the README.PA2 file. I'm going to )
+                               (keep these numbers consistent, but that means)
+                               (we need 2 blank lines here.                  )
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Lines 15-20: Alias for all of the directions except "n" and "ne".
+             Each of these lines are mostly the same (directory name differ).
+             The role of each of these lines is to try to move in the indicated
+             direction (eg, if the command is "e" then try to "cd" to "e").
+             If the "cd" succeeds, you run "see" to display the new location's
+             description. If the "cd" fails, you run "nogo" to display the
+             "You cannot go that way" message. (Of course, "see" and "nogo"
+             were both defined on earlier lines.)
+
+             There are a two points to note:
+             1. You can use "(...)" to get the correct logic to "nogo", but you
+                cannot put the "cd" inside of the "(...)" or it won't persist.
+             2. The symbolic links can break the game, if handled incorrectly.
+                The following explains the problem:
+                 >pwd
+                 /home/Me/PA2/start
+                 >cd e; pwd; ls boulder
+                 /home/Me/PA2/start/e
+                 boulder
+                 >
+                 >echo -n||I am next to the boulder right now. Let us move 
+                 >echo -n||west, and then come back to here:
+                 >cd w; cd e; ls boulder
+                 boulder
+                 >
+                 >echo -n||Yes. I am back next to the boulder. But my path is
+                 >echo -n||not the same as it had been before:
+                 >pwd
+                 /home/Me/PA2/start/e/w/e
+                 >
+                 >
+                 >echo -n||The problem is that the symbolic link is being put
+                 >echo -n||into the path.
+                 >
+                 >
+                 >echo -n||The fact that the path can grow like this can break
+                 >echo -n||the game:
+                 >cd w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e
+                 >pwd; ls boulder
+                 /home/Me/PA2/start/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e
+                 boulder
+                 >
+                 >echo -n||We are still next to the boulder, but the path is
+                 >echo -n||now very long. There will be a problem soon:
+                 >cd w; pwd
+                 /home/Me/PA2/start/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w
+                 >cd e; pwd
+                 /home/Me/PA2/start/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e
+                 >cd w; pwd
+                 sh: cd: w: Not a directory
+                 /home/Me/PA2/start/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e/w/e
+                 >ls boulder
+                 boulder
+                 >
+                 >
+                 >echo -n||So there is a limit to the path length.
+                 >echo -n||Of course the path is not really that long:"
+                 >pwd -P
+                 /home/Me/PA2/start/e
+
+               There is a solution to this problem. You'll use `` and "pwd -P"
+               to make the argument to "cd". In other words, you'll "cd" based
+               on the physical path, not the relative one with symbolic links.
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+
+Lines 21-22: These are like 15-20, except for "n" and "ne". The reason that we
+             implement these two differently is that these directions may be
+             locked. When the cd fails, we do not execute "nogo" as Lines 15-20
+             do. Instead we test to see whether the subdirectory does exist. If
+             so, we execute "nokey" instead of "nogo".
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 23: Leave this line blank
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 24: alias i='echo You currently have:;(cd ~/I; ls _1_ | __x__ | _2_ .messages) 2> ~/X'
+         The parts that you need to add here, (_1_, __x__, and _2_) are ALL THE
+         SAME as on Line 12. There is nothing new to do on this line. But we
+         still should explain what this line does:
+
+         First notice that it does a "cd" inside of a "(...)". In this case, we
+         are intentionally using the fact that the "cd" will not persist once
+         the ")" is reached.
+
+         Second notice that the "ls" will list all the items you've picked up.
+         The full list is: lamp, shovel, cpu board/card, key, emerald bracelet,
+         and food. All of these names will match to their inventory messages:
+           >cat ~/I/.messages
+           A lamp
+           A shovel
+           A computer board
+           A brass key
+           A bracelet
+           Some food
+           >
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+
+Line 25: alias x='(cat | _1_ | _2_ | _3_) <'
+         Notice the unusual way that I run "cat". Where does its input come
+         from? From a file. From what file? From the filename that you type
+         as an argument. How? Well consider:
+          % source ./pp.sh
+          Dead end
+          You are at a dead end of a dirt road.  The road goes to the east.
+          In the distance you can see that it will eventually fork off.  The
+          trees here are very tall royal palms, and they are spaced equidistant
+          from each other.
+          There is a shovel here.
+          >x shovel
+          It is a normal shovel with a price tag attached that says $19.99.
+          >x tree
+          They are palm trees with a bountiful supply of coconuts in them.
+          > ls
+          1  coconut  coconuts  e  palm  shovel  tree  trees
+          >
+          
+         Notice that the shovel and tree are not just objects in the game; they
+         are filenames in the directory.
+
+         So what happens if we try to examine objects that aren't in this
+         directory?:
+
+          >x boulder
+          sh: boulder: No such file or directory
+          >x xyzzy
+          sh: xyzzy: No such file or directory
+          >x lamp
+          sh: lamp: No such file or directory
+          >i
+          You currently have:
+          A lamp
+          >
+
+         Note that the above outputs are not the same as for the actual game.
+         But we will not worry about that.
+         
+         So what does the (cat ...)< do?
+          > alias smallform='(cat)<'
+          > smallform coconut
+          coconut
+          > smallform e/e/se/se/sw/bracelet
+          bracelet
+          > smallform e/e/se/se/sw/emerald
+          bracelet
+          >
+
+        See that final line? even though I typed "emerald" it displayed
+        "bracelet". So the output is not the name you typed, it is the 
+        contents of that file (which is usually the name you typed).
+
+
+        So then, what are the other parts of (cat | _1_ | _2_ | _3_) <'?
+          > echo bracelet | _1_
+          /home/Me/O bracelet
+          > echo bracelet | _1_ | _2_
+          /home/Me/O/bracelet
+          > echo bracelet | _1_ | _2_ | _3_
+          I see nothing special about that.
+          >
+
+        So the _1_ put a "~/O" at the front of the object name (actually, it
+        put the object name after the ~/O (and the ~/O got expanded when shown)
+        Next, the _2_ turned the " " into a "/". As a result there is now a
+        path.
+        Finally, the _3_ displays the contents of that file which we just
+        created. (Hint: needs xargs)
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+
+Line 26: alias get='(echo > ~/A/`cat` && ls ~/A/_1_ &> ~/X && mv `ls ~/A|_2_` ~/I && echo Taken. || echo "You cannot get that.";ls ~/A/bracelet &> ~/X && mv _3_;ls ~/A/board &> ~/X && mv _4_;ls ~/A/key &> ~/X && chmod _5_; rm -f _6_) <'
+
+         The first part of this command, '(echo > ~/A/`cat` ) <' was too hard,
+         so I have done it for you. The `cat` takes the object name received
+         from the '(...)<' and places that name at the end of a path to "~/A".
+         The 'echo >' then sends a '\n' into that file name and path.
+         The effect of it all? There will be a file in the ~/A directory, and
+         that file name will be the same as the contents of the file which you
+         type as an argument. So, if you are in the room with the shovel and
+         you type "get shovel", then there will be a file named "shovel" in the
+         ~/A directory. If however, you are in the location with the emerald
+         bracelet, and you type "get emerald", then a file named "bracelet"
+         (not "emerald") will be created in the ~/A directory. This is because
+         the emerald file, located at start/e/e/se/se/sw/emerald, contains
+         "bracelet".
+
+         Here are the parts that I have left for you to do:
+         _1_ This is a special wildcard pattern that matches to objects which
+             can be picked up. The output will contain the full path, however.
+             (We know that the user has typed the name of a file that is in the
+             current room, because UNIX would have given an error otherwise.)
+             Not every object can be picked up. To test your pattern, you can
+             try this:
+               % cd ~/O; ls _1_
+               board  bracelet  card  cpu  emerald  food  key  lamp  shovel
+               %
+               
+             In the above output, the files "card", "cpu", and "emerald" are
+             don't-care-conditions, so you can match them or not as you like.
+             The key point is that immovable objects like the trees must not
+             match.
+
+         _2_ To get here, the _1_ must have matched. So the object that the
+             user has requested to get is a valid, movable object within the
+             current location. But we have a problem in making the get command 
+             to work. Although we know the name of the file, for example:
+               % cd ~/A; ls
+               shovel
+               %
+               
+             The above output is what would go into ~/A if the user typed
+             "get shovel". But the problem is that we cannot do a "cd ~/A",
+             because then we would no longer be in our current directory -- and
+             we need to move the shovel out of the current directory.
+
+             The solution is to use ls ~/A, but the problem is that it gives
+             not just "shovel" but the whole path "/home/Me/PA2/A/shovel".
+
+             Therefore, the _2_ uses basename to strip off the path and leave
+             just the name (in this example, "shovel").
+             
+         _3_ If you moved the bracelet, you still need to copy the emerald.
+         
+         _4_ If you moved the board, you still need to move the cpu and card.
+         
+         _5_ If you have the key, you can unlock the door.
+         
+         _6_ Once we have finished with the argument the user typed, we need 
+             to erase it from the ~/A directory, so that we will be able to 
+             run get again later.
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+
+Line 27: alias dig='__x__'
+         If you have don't have the shovel, you will be told "You have nothing 
+         with which to dig." If you are not in the place with the cpu card (or
+         if it has been dug up, you'll be told "Digging here reveals nothing."
+         If, however, you are ready to find the card, you will be told "I think
+         you found something." and the three hidden files will be renamed to
+         not be hidden (by removing the "."s)
+
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+Line 28: Leave this line blank
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+
+Line 29: cd; PS1='>'; chmod _1_; chmod _2_; _3_; _4_; _5_; l
+
+         The "cd" takes you to your home directory.
+         
+         The "PS1='>'" is the bash shell command to change the prompt to a ">".
+         
+         The chmod _1_ unlocks the door to the house (regardless of whether it
+             already was or you have the key.)
+             
+         The chmod _2_ unlocks the door to north of the house's hallway (It is
+             is the backdoor of the house, which is for us an empty directory.)
+             
+         The _3_ removes the PA2 directory and all of its subdirectories. Since
+             the two doors have been unlocked, this will not have any problems
+             with permissions.
+             
+         The _4_ expands the PA1.tar file, thus resetting it to create a fresh
+             beginning for the game.
+             
+         The _5_ changes to the start directory.
+         
+         Finally, an "l" command is executed to display the description of the
+             first location.
+         
+Think about what line 29 is doing. It is not an alias. When you type "source
+PA2.Bxxxxxxxxx.sh", it will:
+ 1. Create links on Lines 1-5.
+ 2. Define aliases on Lines 6-28. (They don't run; they are just defined.)
+ 3. Execute the commands on Line 29. This will start the game.
+
+Therefore, here is how the game is to be run:
+  % pwd
+  /home/Me
+  % bash
+
+  Me@DESKTOP-LN5NLOL ~      (This is what my bash's default prompt is)
+  $ source ./PA2.Bxxxxxxxxx.sh
+  Dead end
+  You are at a dead end of a dirt road.  The road goes to the east.
+  In the distance you can see that it will eventually fork off.  The
+  trees here are very tall royal palms, and they are spaced equidistant
+  from each other.
+  There is a shovel here.
+  >drop lamp && echo "This won't crash once we implement the drop.sh script"
+  -bash: /home/Me/drop.sh: No such file or directory
+  >x shovel
+  It is a normal shovel with a price tag attached that says $19.99.
+  >pwd
+  /home/Me/PA2/start
+  >quit
+  You have scored 0 out of a possible 90 points.
+  exit
+  % x shovel
+  -bash: x: command not found
+  % pwd
+  /home/Me
+  %
+
+Notice, in the above, that it says exit, and that my prompt is back to the "%"
+It is not ">", and it is also not "Me@DESKTOP-LN5NLOL `pwd`\n$ ". So the bash
+shell had invoked is gone. So any variables I had changed (like the prompt) do
+not persist; any directories I had changed (like from ~ to ~/PA2/start) do not
+persist; and any aliases that had been created (like "x") do not persist.
