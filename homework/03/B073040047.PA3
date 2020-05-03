@@ -31,7 +31,17 @@ while ( 1 )
 				mv 1 9 >& ~/X;
                 head -n `ls [0-9]` .d*
                 mv 9 1 >& ~/X;
-				ls ???* | itemAlerts >& ~/X
+                
+                set files = ( `ls -p | grep -v /` )
+                foreach i ( $files )
+                    if ( -f $i) then 
+                        set length = `wc -c "$i" | cut -d ' ' -f 1`
+                        if ( $length >= 3 ) then
+                            ls $i | itemAlerts
+                        endif
+                    endif
+                end
+
                 ls -d >~/X
             else
 				ls -d $op[1] >& ~/X
@@ -44,32 +54,52 @@ while ( 1 )
             breaksw
         case {e,s,w,se,nw,sw}:
             if ( -e $op[1] ) then
-				cd `pwd -P`/$op[1]
-                mv 1 9 >& ~/X;
-                head -n `ls [0-9]` .d*
-                mv 9 1 >& ~/X;
-				ls ???* | itemAlerts >& ~/X
-                ls -d >~/X
-
                 if ( -e bear ) then
                     echo "You are dead."
                     quit
                     break
-			    endif
+                endif
+                
+				cd `pwd -P`/$op[1]
+                mv 1 9 >& ~/X;
+                head -n `ls [0-9]` .d*
+                mv 9 1 >& ~/X;
+				
+                set files = ( `ls -p | grep -v /` )
+                foreach i ( $files )
+                    if ( -f $i) then 
+                        set length = `wc -c "$i" | cut -d ' ' -f 1`
+                        if ( $length >= 3 ) then
+                            ls $i | itemAlerts
+                        endif
+                    endif
+                end
+
+                ls -d >~/X
             else
                 nogo
             endif
-
-            breaksw
+			breaksw
         case l:
             mv 1 9 >& ~/X
             head -n `ls [0-9]` .d*
             mv 9 1 >& ~/X
-			ls ???* | itemAlerts
+			
+            set files = ( `ls -p | grep -v /` )
+            foreach i ( $files )
+                if ( -f $i) then 
+                    set length = `wc -c "$i" | cut -d ' ' -f 1`
+                    if ( $length >= 3 ) then
+                        ls $i | itemAlerts
+                    endif
+                endif
+            end
+            
             ls -d >~/X
             breaksw
         case dig:
-            if (ls ~/I/s* >& ~/X) then
+			
+            if ( -e ~/I/shovel ) then
                 if ( ( mv .card card && mv .board board && mv .cpu cpu ) >& ~/X && echo "I think you found something." || echo "Digging here reveals nothing." ) then
                     echo "You have nothing with which to dig."
                 endif
