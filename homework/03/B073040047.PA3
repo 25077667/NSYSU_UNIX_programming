@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 
 rm -f ~/X ~/O ~/I ~/A
 ln -s /dev/null ~/X
@@ -6,50 +6,99 @@ ln -s ~/PA2/inventory ~/I
 ln -s ~/PA2/objects ~/O
 ln -s ~/PA2/obj ~/A
 
-alias see 'head -n `ls [0-9]` .d*;mv 9 1 &> ~/X;(ls ???* | itemAlerts)2>~/X;ls -d >~/X'
+chmod 700 ~/PA2/start/e/e/ne/ne/ne/n
+chmod 700 ~/PA2/start/e/e/ne/ne/ne
+rm -rf ~/PA2
+tar xf ~/PA2.tar
+cd ~/PA2/start
+
 alias nogo 'echo "You cannot go that way."'
-alias dig 'ls ~/I/s* &> ~/X && ( ( mv .card card && mv .board board && mv .cpu cpu ) &> ~/X && echo "I think you found something." || echo "Digging here reveals nothing." ) || echo "You have nothing with which to dig."'
+alias nokey 'echo You do not have a key that can open this door.'
 
-alias i='echo You currently have:;(cd ~/I; ls * | cat -n | tr -d "\t1-8" | cat -n | tr "\t1-8" "e-" | xargs fgrep .messages) 2> ~/X'
-alias x='(cat | xargs echo ~/O | tr " " "/" | xargs cat) <'
-alias get='(echo > ~/A/`cat` && ls ~/A/*[^ne][^d][tduypl] &> ~/X && mv `ls ~/A|xargs basename` ~/I && echo Taken || echo "You cannot get that.";ls ~/A/bracelet &> ~/X && mv emerald ~/I;ls ~/A/board &> ~/X && mv cpu card ~/I;ls ~/A/key &> ~/X && chmod 700 ~/PA2/start/e/e/ne/ne/ne; rm -f ~/A/*) <'
+#alias i 'echo You currently have:;(cd ~/I; ls * | cat -n | tr -d "\t1-8" | cat -n | tr "\t1-8" "e-" | xargs fgrep .messages) >2> ~/X'
+#alias x '(cat | xargs echo ~/O | tr " " "/" | xargs cat) <'
+#alias get '(echo > ~/A/`cat` && ls ~/A/*[^ne][^d][tduypl] >2> ~/X && mv `ls ~/A|xargs basename` ~/I && echo Taken || echo "You cannot get that.";ls ~/A/bracelet >2> ~/X && mv emerald ~/I;ls ~/A/board >2> ~/X && mv cpu card ~/I;ls ~/A/key >2> ~/X && chmod 700 ~/PA2/start/e/e/ne/ne/ne; rm -f ~/A/*) <'
+alias quit 'echo "You have scored 0 out of a possible 90 points."'
+alias itemAlerts 'cat -n | tr -d "\t1-8" | cat -n | tr "\t1-8" "e-" | xargs fgrep ~/O/.alerts'
 
-while ( true )
-    echo -n ">"
-    set op = $<
-    switch op
-        case "l":
-            mv 1 9 &> ~/X;see
+while ( 1 )
+    echo -n "> "
+    set op = ( $< )
+    switch ( $op[1] )
+        case {n,ne}:
+            if ( -e $op[1] ) then
+                cd `pwd -P`/$op[1]
+				mv 1 9 >& ~/X;
+                head -n `ls [0-9]` .d*
+                mv 9 1 >& ~/X;
+				ls ???* | itemAlerts >& ~/X
+                ls -d >~/X
+            else
+				ls -d $op[1] >& ~/X
+                if ( $? != 0 ) then
+					nokey
+                else
+                    nogo
+			    endif
+            endif
             breaksw
-        case "e":
-            cd `pwd -P`/e &> ~/X && (see) || nogo
+        case {e,s,w,se,nw,sw}:
+            if ( -e $op[1] ) then
+				cd `pwd -P`/$op[1]
+                mv 1 9 >& ~/X;
+                head -n `ls [0-9]` .d*
+                mv 9 1 >& ~/X;
+				ls ???* | itemAlerts >& ~/X
+                ls -d >~/X
+
+                if ( -e bear ) then
+                    echo "You are dead."
+                    quit
+                    break
+			    endif
+            else
+                nogo
+            endif
+
             breaksw
-        case "s":
-            cd `pwd -P`/s &> ~/X && (see) || nogo
+        case l:
+            mv 1 9 >& ~/X
+            head -n `ls [0-9]` .d*
+            mv 9 1 >& ~/X
+			ls ???* | itemAlerts
+            ls -d >~/X
             breaksw
-        case "w":
-            cd `pwd -P`/w &> ~/X && (see) || nogo
+        case dig:
+            if (ls ~/I/s* >& ~/X) then
+                if ( ( mv .card card && mv .board board && mv .cpu cpu ) >& ~/X && echo "I think you found something." || echo "Digging here reveals nothing." ) then
+                    echo "You have nothing with which to dig."
+                endif
+            else 
+                echo "You have nothing with which to dig."
+            endif
             breaksw
-        case "se":
-            cd `pwd -P`/se &> ~/X && (see) || nogo
-            # bear condition
-            breaksw
-        case "nw":
-            cd `pwd -P`/nw &> ~/X && (see) || nogo
-            breaksw
-        case "sw":
-            cd `pwd -P`/sw &> ~/X && (see) || nogo
-            breaksw
-        case "n":
-            cd `pwd -P`/n &> ~/X  && (see)|| (ls -d n &> ~/X &&nokey || nogo)
-            breaksw
-        case "ne":
-            cd `pwd -P`/ne &>~/X && (see)|| (ls -d ne &> ~/X && nokey || nogo)
-            breaksw
-        case "dig":
-            dig
-            breaksw
-            
+        case quit:
+			quit
+			break
+		case x:
+			echo "$op[@]"
+			set obj = $op[2]
+			if ( -e $obj ) then
+				if ( -e ~/I/"$obj" ) then
+					cat $obj | xargs echo ~/O | tr " " "/" | xargs cat
+				endif
+			else if ( -e ~/I/"$obj" ) then
+				echo "I don't see that here." 
+			else
+				echo "I don't know what that is."
+			endif
+			breaksw
         default:
+			# debug info
+			$op[1]
+			echo $op
+			# debug info
             echo "I don't understand that." 
+			breaksw
+		endsw
 end
