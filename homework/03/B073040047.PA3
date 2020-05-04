@@ -6,60 +6,51 @@ ln -s ~/PA2/inventory ~/I
 ln -s ~/PA2/objects ~/O
 ln -s ~/PA2/obj ~/A
 
-chmod 700 ~/PA2/start/e/e/ne/ne/ne/n
-chmod 700 ~/PA2/start/e/e/ne/ne/ne
+chmod 777 ~/PA2/start/e/e/ne/ne/ne/n
+chmod 777 ~/PA2/start/e/e/ne/ne/ne
 rm -rf ~/PA2
 tar xf ~/PA2.tar
 cd ~/PA2/start
 
 alias nogo 'echo "You cannot go that way."'
 alias nokey 'echo You do not have a key that can open this door.'
-
-#alias i 'echo You currently have:;(cd ~/I; ls * | cat -n | tr -d "\t1-8" | cat -n | tr "\t1-8" "e-" | xargs fgrep .messages) >2> ~/X'
-#alias x '(cat | xargs echo ~/O | tr " " "/" | xargs cat) <'
-#alias get '(echo > ~/A/`cat` && ls ~/A/*[^ne][^d][tduypl] >2> ~/X && mv `ls ~/A|xargs basename` ~/I && echo Taken || echo "You cannot get that.";ls ~/A/bracelet >2> ~/X && mv emerald ~/I;ls ~/A/board >2> ~/X && mv cpu card ~/I;ls ~/A/key >2> ~/X && chmod 700 ~/PA2/start/e/e/ne/ne/ne; rm -f ~/A/*) <'
 alias quit 'echo "You have scored 0 out of a possible 90 points."'
 alias itemAlerts 'cat -n | tr -d "\t1-8" | cat -n | tr "\t1-8" "e-" | xargs fgrep ~/O/.alerts'
 
+set canGet = ()
+foreach i ( `ls ~/O/*[acklov][elmopr][dlptuy]` )
+	set canGet = ( $canGet `basename $i` )
+end
+
+alias check2_puls 'if ( `expr $#op "<" 2` ) then \
+echo "You must supply an object." \
+breaksw \
+endif'
+
 while ( 1 )
-    echo -n "> "
+    echo -n ">"
     set op = ( $< )
+    if ( `expr $#op "=" "0"` ) then 
+        continue
+    endif
     switch ( $op[1] )
         case {n,ne}:
-            if ( -e $op[1] ) then
-                cd `pwd -P`/$op[1]
-				mv 1 9 >& ~/X;
-                head -n `ls [0-9]` .d*
-                mv 9 1 >& ~/X;
-                
-                set files = ( `ls -p | grep -v /` )
-                foreach i ( $files )
-                    if ( -f $i) then 
-                        set length = `wc -c "$i" | cut -d ' ' -f 1`
-                        if ( $length >= 3 ) then
-                            ls $i | itemAlerts
-                        endif
-                    endif
-                end
-
-                ls -d >~/X
-            else
-				ls -d $op[1] >& ~/X
-                if ( $? != 0 ) then
-					nokey
+            if ( -d $op[1] ) then
+                if ( -x $op[1] ) then
+                    # can go
                 else
-                    nogo
-			    endif
+                    echo "You do not have a key that can open this door."
+					breaksw
+                endif
             endif
-            breaksw
         case {e,s,w,se,nw,sw}:
-            if ( -e $op[1] ) then
+            if ( -d $op[1] ) then
                 if ( -e bear ) then
                     echo "You are dead."
                     quit
                     break
                 endif
-                
+
 				cd `pwd -P`/$op[1]
                 mv 1 9 >& ~/X;
                 head -n `ls [0-9]` .d*
@@ -69,7 +60,7 @@ while ( 1 )
                 foreach i ( $files )
                     if ( -f $i) then 
                         set length = `wc -c "$i" | cut -d ' ' -f 1`
-                        if ( $length >= 3 ) then
+                        if ( $length >= 2 ) then
                             ls $i | itemAlerts
                         endif
                     endif
@@ -98,10 +89,14 @@ while ( 1 )
             ls -d >~/X
             breaksw
         case dig:
-			
             if ( -e ~/I/shovel ) then
-                if ( ( mv .card card && mv .board board && mv .cpu cpu ) >& ~/X && echo "I think you found something." || echo "Digging here reveals nothing." ) then
-                    echo "You have nothing with which to dig."
+                if ( -e .board || -e .card || -e .cpu ) then
+                    mv .board board
+                    mv .card card
+                    mv .cpu cpu
+                    echo "You think you found something."
+                else
+                    echo "Digging here reveals nothing."
                 endif
             else 
                 echo "You have nothing with which to dig."
@@ -111,22 +106,186 @@ while ( 1 )
 			quit
 			break
 		case x:
-			echo "$op[@]"
+			check2_puls
 			set obj = $op[2]
-			if ( -e $obj ) then
-				if ( -e ~/I/"$obj" ) then
-					cat $obj | xargs echo ~/O | tr " " "/" | xargs cat
-				endif
-			else if ( -e ~/I/"$obj" ) then
+			if ( -e $obj || -e ~/I/$obj ) then
+					cat ~/O/$obj
+			else if ( -e ~/O/$obj ) then
 				echo "I don't see that here." 
 			else
 				echo "I don't know what that is."
 			endif
 			breaksw
+		case take:
+		case get:
+            check2_puls
+			set obj = $op[2]
+            if ( -e $obj ) then
+				#echo "$canGet":"$obj"
+                if ( "${canGet}" =~ "*$obj*" ) then
+                    if ( $obj =~ bracelet || $obj == emerald ) then
+                        mv emerald bracelet ~/I
+                    else if ( $obj =~ cpu || $obj =~ card || $obj =~ board ) then
+                        mv board card cpu ~/I
+                    else if ( $obj =~ key ) then
+                        chmod +x ~/PA2/start/e/e/ne/ne/ne
+                        chmod +x ~/PA2/start/e/e/ne/ne/ne/n
+                        mv key ~/I
+                    else 
+                        mv $obj ~/I
+                    endif
+                    echo "Taken."
+                else
+                    echo "You cannot take that."
+                endif
+            else if ( -e ~/O/$obj ) then
+                echo "I do not see that here."
+            else
+                echo "I don't know what that is."
+            endif
+			breaksw
+		case throw:
+		case drop:
+            check2_puls
+			set obj = $op[2]
+			if ( -e ~/I/$obj ) then
+				if ( $obj =~ bracelet || $obj == emerald ) then
+                    mv ~/I/emerald ~/I/bracelet .
+                else if ( $obj =~ cpu || $obj =~ card || $obj =~ board ) then
+                    mv ~/I/board ~/I/card ~/I/cpu .
+                else if ( $obj =~ key ) then
+                    chmod -x ~/PA2/start/e/e/ne/ne/ne
+                    mv ~/I/key .
+                else if ( $obj =~ food && -e bear ) then 
+                    mv .key key
+					rm -f bear ~/I/food
+					echo "Done."
+					echo "The bear takes the food and runs away with it. He left something behind."
+					breaksw
+                else 
+                    mv ~/I/$obj .
+                endif
+                echo "Done."
+			else if ( -e ~/O/$obj ) then
+				echo "You don't have that."
+			else
+				echo "I don't know what that is."
+			endif
+			breaksw
+		case climb:
+            check2_puls
+			set obj = $op[2]
+			if ( -e $obj ) then
+				if ( $obj =~ palm || $obj =~ tree || $obj =~ trees ) then
+					echo "You manage to get about two feet up the tree and fall back down.  You"
+                    echo "notice that the tree is very unsteady."
+                else
+					echo "You can't climb that."
+				endif
+			else if ( -e ~/O/$obj ) then 
+				echo "I do not see that here."
+			else 
+				echo "I don't know what that object is."
+			endif
+			breaksw
+        case shake:
+            #if ( `expr $#op "<" 2` ) then
+            #    echo "You must supply an object."
+            #    breaksw
+            #endif
+            check2_puls
+			set obj = $op[2]
+			if ( -e $obj ) then
+				if ( $obj =~ palm || $obj =~ tree || $obj =~ trees ) then
+					echo "You begin to shake a tree, and notice a coconut begin to fall from the air."
+                    echo "As you try to get your hand up to block it, you feel the impact as it lands"
+                    echo "on your head."
+                    echo "You are dead."
+                    quit
+                    break
+                else if ( $obj =~ bear ) then
+                    echo "As you go up to the bear, it removes your head and places it on the ground."
+                    echo "You are dead."
+                    quit
+                    break
+				else
+					echo "You don't have that."
+				endif
+            else if ( -e ~/I/$obj ) then
+                echo "Shaking a $obj seems to have no effect."
+			else if ( -e ~/O/$obj ) then 
+				echo "I don't see that here."
+			else 
+				echo "I don't know what that is."
+			endif
+			breaksw
+        case eat:
+            check2_puls
+            set obj = $op[2]
+            if ( -e ~/I/$obj ) then
+                if ( $obj =~ food ) then 
+                    echo "That taste horrible."
+                else 
+                    echo "You forcefully shove a $obj down your throat, and start choking."
+                    echo ""
+                    echo "You are dead."
+                    quit
+                    break
+                endif
+            else if ( -e ~/O/$obj ) then
+                echo "You don't have that."
+			else
+				echo "I don't know what that is."
+            endif
+            breaksw
+        case put:
+            check2_puls
+            set obj = $op[2]
+            if ( `expr $#op "<" 4` ) then
+                if ( -e $obj || -e ~/I/$obj ) then
+                    echo "You must supply an indirect object."
+                else if ( -e ~/O/$obj ) then
+                    echo "You don't have that."
+                else
+                    echo "I don't know what that object is."
+                endif
+            else
+                set place = $op[4]
+                set canAt = ( vax computer cabinet )
+                set canPut = ( card board cpu )
+                
+                if ( -e $obj || -e ~/I/$obj ) then
+                    if ( -e $place || -e ~/I/$place ) then
+                        if ( "$canPut" =~ "*$obj*" && "$canAt" =~ "*$place*" ) then
+                            rm -f ~/I/*[ac][pr][du]
+                            mv .flashing flashing
+                            mv steady .steady
+                            echo "As you put the CPU board in the computer, it immediately springs to life."
+                            echo "The lights start flashing, and the fans seem to startup."
+                        else
+                            echo "I don't know how to combine those objects.  Perhaps you should"
+                            echo "just try dropping it."
+                        endif
+                    else
+                        echo "That indirect object is not here."
+                    endif
+                else if ( -e ~/O/$obj && -e ~/O/$place ) then
+                    echo "You don't have that"
+                else
+                    echo "I don't know what that object is."
+                endif
+            endif
+            breaksw
+        case i:
+            echo "You currently have:"
+            foreach obj ( `ls ~/I` )
+				echo "-e $obj" | xargs fgrep ~/I/.messages
+			end
+            breaksw
         default:
 			# debug info
-			$op[1]
-			echo $op
+			# $op[1]
+			# echo $op
 			# debug info
             echo "I don't understand that." 
 			breaksw
