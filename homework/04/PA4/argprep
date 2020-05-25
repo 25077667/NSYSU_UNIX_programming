@@ -1,0 +1,142 @@
+# B073040047
+
+s/palms/tree/g
+s/emerald/bracelet/g
+s/\(card\|cpu\)/board/g
+s/[\ ][\ ]*/\ /g
+s/^[^a-z]*//g
+s/\ $/\\n/g
+t eliminate_t
+:eliminate_t
+
+#---------- Supports methods ----------#
+s/^eat/e/g
+t eat
+
+s/^\(drop\|throw\)/d/g
+t drop
+
+s/^\(get\|take\)/g/g
+t get
+
+s/^shake/s/g
+t shake
+
+s/^climb/c/g
+t climb
+
+s/^\(l\|x\)/&/g
+t L_X
+
+s/^\(put\|insert\)/p/g
+t put
+
+s/^i/&/g
+t i
+
+b notSupportMethod
+
+#---------- functions -----------#
+
+:eat
+N
+s/^e \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\)\n.*/e \1/g
+	t end
+s/^e \(.*\)\n.*/I do not know what that is./g
+	t end
+
+b YouMustSupplyAnObject
+
+:drop
+N
+s/^d \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\).*\n.*/d \1/g	
+	t end
+s/^d \(.*\)\n.*/I do not know what that is./g
+	t end
+
+b YouMustSupplyAnObject
+
+:get
+N
+s/^g \([^ ]*\)\n.*\1.*/g \1/g
+	t end
+#s/^g \([^ ]*\)\n.*\1.*/g \1/g
+#	t end
+s/^g .*/I do not see that here./g
+	t end
+b YouMustSupplyAnObject
+
+:shake
+N
+s/^s \(.*\)\n.*\1.*/s \1/g
+	t end
+s/^s \(.*\)\n.*/s \1 \@/g
+	t end
+b YouMustSupplyAnObject
+
+:climb
+N
+s/^c \(.*\)\n.*\1.*/c \1/g
+	t end
+s/^c .*/I do not see that here./g
+	t end
+s/.*tree.*/c tree/g
+	t end
+cThere is nothing here to climb.
+t end
+
+:L_X
+N
+s/^\(x\|l\)\n.*$/l/g
+	t end
+s/^\(x\|l\) \([a-z]*\)\n.*\2.*/x \2/g
+	t end
+s/^\(x\|l\) \([a-z]*\) .*\n.*\2.*/x \2/g
+	t end
+s/^\(x\|l\) \([a-z]*\).*\n.*/x \2 \@/g
+	t end
+b end
+
+:put
+N
+# both valid
+# valid \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\)
+s/^p \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\) [^ ]* \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\)\n.*\(\1\.*\2\|\2\.*\1\).*/p \1 in \2/g
+	t end
+# both valid, and some junk
+s/^p \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\) [^ ]* \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\).*\n.*\(\1\.*\2\|\2\.*\1\).*/p \1 in \2/g
+	t end
+
+# \1 \2 are valid but \2 not in ls
+s/^p \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\) [^ ]* \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\)\n.*\(\1\).*/p \1 in \2 \@/g	
+	t end
+# \1 \2 are valid but \2 not in ls, and some junk
+s/^p \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\) [^ ]* \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\).*\n.*\(\1\).*/p \1 in \2 \@/g	
+	t end
+# \1 valid but \2 not
+s/^p \(bear\|bin\|bins\|board\|boulder\|bracelet\|cabinet\|coconut\|coconuts\|computer\|food\|key\|lamp\|shovel\|tree\|trees\|vax\) .* \(.*\)\n.*\1.*/I do not know what that indirect object is./g	
+	t end
+# \1 invalid
+s/^p \(.*\) .* \(.*\)\n.*/I do not know what that is./g
+	t end
+s/^p \(.*\).*/You must supply an indirect object./g
+	t end
+# \1 not exist
+b YouMustSupplyAnObject
+
+:i
+N
+s/^i.*/i/g
+b end
+
+:notSupportMethod
+N
+c I don't understand that
+	d
+	b end
+
+:YouMustSupplyAnObject
+c You must supply an object.
+	b end
+
+:end
